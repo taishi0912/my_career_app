@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>キャリア・クエスト - ゲーム終了</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+    <div class="type-result">
+        <h2>あなたのタイプは {{ user_type }} です！</h2>
+        <img src="{{ url_for('static', filename='images/' + user_type + '.png') }}" alt="{{ user_type }}">
+
+        <div class="item-box">
+            <h3>獲得したアイテム</h3>
+            {% for item in item_box %}
+            <div class="item">
+                <img src="{{ url_for('static', filename='images/items/' + item + '.png') }}" alt="{{ item }}">
+                {{ item }}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>キャリア・クエスト - ゲーム終了</h1>
+
+        <h2>{{ ending.title }}</h2>
+        <p>{{ ending.description }}</p>
+        <p>あなたは{{ evaluation }}キャリアを築きました。</p>
+
+        <h3>あなたのキャリアパス</h3>
+        <div class="timeline">
+            {% for event in timeline %}
+            <div class="timeline-item {% if loop.index0 % 2 == 0 %}left{% else %}right{% endif %}">
+                {% if event.is_important %}important{% endif %}
+                <div class="content {% if event.is_important %}important{% endif %}">
+                    <h4>{{ event.question }}</h4>
+                    <p>選択: {{ event.choice }}</p>
+                    <p>日時: {{ event.timestamp }}</p>
+                    {% if event.crystals_used > 0 %}
+                    <p>使用タイムクリスタル: {{ event.crystals_used }}</p>
+                    {% endif %}
+                    {% if event.is_important %}
+                    **重要な分岐点**
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <h3>統計</h3>
+        <p>総選択回数: {{ career_path|length }}</p>
+        <p>ユニークな選択: {{ unique_choices_count }}</p>
+        <p>使用したタイムクリスタル: {{ user.time_crystals }}</p>
+
+        <div id="future-self-section" style="display: none;">
+            <h2>未来の自分からのメッセージ</h2>
+            <div id="self-analysis-result"></div>
+
+            <h3>未来の自分との対話</h3>
+            <div id="chat-container">
+                <div id="chat-messages"></div>
+                <input type="text" id="user-input" placeholder="メッセージを入力...">
+                <button id="send-button">送信</button>
+            </div>
+
+            <h3>タイムクリスタルを使用</h3>
+            <button id="use-time-crystal">重要な分岐点に戻る</button>
+        </div>
+
+        <button id="meet-future-self">未来の自分に会う</button>
+
+        <a href="{{ url_for('home') }}" class="button">ホームに戻る</a>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $('#meet-future-self').click(function () {
+                $('#future-self-section').show();
+                $(this).hide();
+                performSelfAnalysis();
+            });
+
+            function performSelfAnalysis() {
+                $.post('/future_self_analysis', function (data) {
+                    $('#self-analysis-result').html(`
+                        <h3>自己分析結果</h3>
+                        <p><strong>強み:</strong> ${data.strength}</p>
+                        <p><strong>弱み:</strong> ${data.weakness}</p>
+                        <p><strong>機会:</strong> ${data.opportunity}</p>
+                        <p><strong>脅威:</strong> ${data.threat}</p>
+                    `);
+                });
+            }
+
+            $('#send-button').click(sendMessage);
+            $('#user-input').keypress(function (e) {
+                if (e.which == 13) {
+                    sendMessage();
+                }
+            });
+
+            function sendMessage() {
+                var message = $('#user-input').val().trim();
+                if (message) {
+                    addMessageToChat('user', message);
+                    getAIResponse(message);
+                    $('#user-input').val('');
+                }
+            }
+
+            function addMessageToChat(sender, message) {
+                $('#chat-messages').append(`<div class="chat-message ${sender}-message">${message}</div>`);
+                $('#chat-messages').scrollTop($('#chat-messages')[0].scrollHeight);
+            }
+
+            function getAIResponse(message) {
+                $.post('/get_ai_response', { question: message }, function (data) {
+                    addMessageToChat('ai', data.response);
+                });
+            }
+
+            $('#use-time-crystal').click(function () {
+                $.post('/use_time_crystal', function (data) {
+                    if (data.success) {
+                        alert('タイムクリスタルを使用して重要な分岐点に戻りました。');
+                        window.location.href = '/game';
+                    } else {
+                        alert(data.message);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
+<script src="{{ url_for('static', filename='game_over.js') }}"></script>

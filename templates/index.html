@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>キャリア・クエスト - ホーム</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <header>
+        <h1>キャリア・クエスト</h1>
+        <p>まだ見ぬ自分に出会う旅へ - 未来のあなたを体験しよう、ソフトにキャリアを探索しよう</p>
+    </header>
+    <div class="container">
+        <div class="button-container">
+            <a href="{{ url_for('register') }}" class="button">新規登録</a>
+            <a href="{{ url_for('login') }}" class="button">ログイン</a>
+        </div>
+    </div>
+</body>
+
+</html>

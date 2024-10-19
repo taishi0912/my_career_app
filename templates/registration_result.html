@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登録完了 - キャリア・クエスト</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>登録完了</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <p>ご登録ありがとうございます！</p>
+        <p>あなたの最適な業界は、<strong>{{ industry }}</strong>です。</p>
+
+        <h2>適性診断結果</h2>
+        <div style="width: 80%; margin: auto;">
+            <canvas id="aptitudeChart"></canvas>
+        </div>
+
+        <p>これはあくまで簡単な診断結果です。ゲームを進めながら、さらに自己理解を深めていきましょう！</p>
+
+        <a href="{{ url_for('login') }}" class="button">ログインしてゲームを始める</a>
+    </div>
+
+    <script>
+        var ctx = document.getElementById('aptitudeChart').getContext('2d');
+        var aptitudeData = {{ aptitude_scores| tojson }};
+        var industries = Object.keys(aptitudeData);
+        var scores = Object.values(aptitudeData);
+
+        var chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: industries,
+                datasets: [{
+                    label: '適性スコア',
+                    data: scores,
+                    backgroundColor: industries.map(industry => industry === '{{ industry }}' ? 'rgba(255, 99, 132, 0.8)' : 'rgba(75, 192, 192, 0.6)'),
+                    borderColor: industries.map(industry => industry === '{{ industry }}' ? 'rgba(255, 99, 132, 1)' : 'rgba(75, 192, 192, 1)'),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'スコア'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: '業界'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

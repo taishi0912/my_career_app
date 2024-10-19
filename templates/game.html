@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>キャリア・クエスト - ゲーム画面</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>キャリア・クエスト</h1>
+            <div class="user-info">
+                <p>ようこそ、{{ user.username }}さん！</p>
+                <div class="time-crystal-display">
+                    <img src="{{ url_for('static', filename='images/time_crystal.png') }}" alt="タイムクリスタル">
+                    <span>{{ user.time_crystals }}</span>
+                </div>
+            </div>
+        </header>
+
+        <nav>
+            <a href="{{ url_for('timeline') }}" class="button">タイムラインを表示</a>
+            <a href="{{ url_for('force_game_over') }}" class="button">ゲームを強制終了</a>
+        </nav>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <section class="career-path">
+            <h2>あなたのキャリアパス</h2>
+            <ul>
+                {% for choice in career_path %}
+                <li>{{ choice }}</li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <section class="current-question">
+            <h2>{{ next_question }}</h2>
+            <form action="{{ url_for('make_choice') }}" method="post" class="choice-buttons">
+                {% for choice in choices %}
+                <button type="submit" name="choice" value="{{ choice }}" class="choice-button">{{ choice }}</button>
+                {% endfor %}
+            </form>
+        </section>
+
+        {% if user.time_crystals > 0 and career_path|length > 1 %}
+        <section class="time-crystal-actions">
+            <h2>タイムクリスタルを使用</h2>
+            {% if can_go_back %}
+            <form action="{{ url_for('go_back') }}" method="post">
+                <button type="submit" class="button">前の選択に戻る (タイムクリスタル: 1)</button>
+            </form>
+            {% endif %}
+        </section>
+        {% endif %}
+
+        <section class="item-box">
+            <h2>アイテムボックス</h2>
+            <ul>
+                {% for item in user.item_box %}
+                <li>
+                    <img src="{{ url_for('static', filename='images/items/' + item + '.png') }}" alt="{{ item }}">
+                    <p>{{ item }}</p>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+    </div>
+</body>
+
+</html>

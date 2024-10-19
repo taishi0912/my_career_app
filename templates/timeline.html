@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>キャリア・クエスト - タイムライン</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>キャリア・タイムライン</h1>
+        <p>{{ user.username }}さんのキャリアの軌跡</p>
+
+        <div class="timeline">
+            {% for event in timeline %}
+            <div class="timeline-item {% if event.is_important %}important{% endif %}">
+                <h3>{{ event.question }}</h3>
+                <p>選択: {{ event.choice }}</p>
+                <p>日時: {{ event.timestamp }}</p>
+                {% if event.crystals_used > 0 %}
+                <p>使用タイムクリスタル: {{ event.crystals_used }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <a href="{{ url_for('game') }}" class="button">ゲームに戻る</a>
+    </div>
+</body>
+
+</html>
